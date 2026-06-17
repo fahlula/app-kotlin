@@ -10,6 +10,18 @@ class App {
 // Sistema de oferta de serviços 
 fun main() {
     val idadeMinima = 18
+    var respostaUsuario = "Não houve resposta"
+    var situacaoFinal = "Oferta não processada"
+
+    // Lista mutável que vai guardar as ofertas escolhidas pelo usuário
+    val ofertasEscolhidas = mutableListOf<String>()
+
+    // Mapa com ofertas organizadas por gênero (1=Feminino, 2=Masculino, 3=Outro)
+    val ofertas = mapOf(
+        1 to listOf("Filmes Romance", "Séries Drama", "Documentários"),
+        2 to listOf("Esportes", "Futebol", "MMA"),
+        3 to listOf("Jogos", "Filmes", "Documentários")
+    )
 
     println("Digite seu nome:")
     val nome = readln()
@@ -32,45 +44,60 @@ fun main() {
 
     val maiorDeIdade = idade >= idadeMinima
 
-    var conteudoOfertado = "Nenhum conteúdo ofertado"
-    var respostaUsuario = "Não houve resposta"
-    var situacaoFinal = "Oferta não processada"
-
     if (maiorDeIdade) {
-        conteudoOfertado = when (opcaoGenero) {
-            1 -> "Oferta de filmes e séries"
-            2 -> "Oferta de esportes e futebol"
-            3 -> "Oferta de jogos, filmes e documentários"
-            else -> "Oferta geral de entretenimento"
-        }
+        // Obtém as ofertas do gênero escolhido. Se gênero inválido, oferece a geral (Elvis Operator ?:)
+        val minhasOfertas = ofertas[opcaoGenero] ?: listOf("Oferta geral de entretenimento")
 
         println()
         println("Olá, $nome!")
-        println("Temos uma oferta para você:")
-        println(conteudoOfertado)
-        println("Você aceita contratar o serviço? Digite true ou false:")
+        println("Temos ${minhasOfertas.size} oferta(s) disponíveis para você.")
 
-        val aceitaServico = readln().toBoolean()
+        // Percorre CADA oferta disponível para esse gênero
+        for (oferta in minhasOfertas) {
+            println()
+            println("Oferta disponível: $oferta")
+            println("Você aceita esta oferta? Digite true ou false:")
 
-        if (aceitaServico) {
-            respostaUsuario = "Aceitou"
+            val aceitaOferta = readln().toBoolean()
+
+            if (aceitaOferta) {
+                ofertasEscolhidas.add(oferta)
+                println("Oferta adicionada com sucesso!")
+            } else {
+                println("Oferta recusada.")
+            }
+        }
+
+        // Valida se o usuário aceitou PELO MENOS 1 oferta
+        if (ofertasEscolhidas.size > 0) {
+            respostaUsuario = "Aceitou ${ofertasEscolhidas.size} oferta(s)"
             situacaoFinal = "Serviço contratado com sucesso"
         } else {
-            respostaUsuario = "Recusou"
-            situacaoFinal = "Serviço recusado pelo usuário"
+            respostaUsuario = "Recusou todas as ofertas"
+            situacaoFinal = "Nenhuma oferta aceita"
         }
     } else {
         situacaoFinal = "Oferta não permitida para menores de idade"
     }
 
+    // Exibe o relatório final com todas as informações do usuário
     println()
     println("=== RELATÓRIO ===")
     println("Nome: $nome")
     println("Idade: $idade")
     println("Sexo/gênero: $genero")
     println("Maior de idade? $maiorDeIdade")
-    println("Conteúdo ofertado: $conteudoOfertado")
+
+    // Mostra todas as ofertas escolhidas pelo usuário
+    if (ofertasEscolhidas.size > 0) {
+        println("Ofertas selecionadas:")
+        for (oferta in ofertasEscolhidas) {
+            println("- $oferta")
+        }
+    } else {
+        println("Nenhuma oferta selecionada")
+    }
+
     println("Resposta do usuário: $respostaUsuario")
     println("Situação final: $situacaoFinal")
 }
-
