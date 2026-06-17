@@ -43,5 +43,19 @@ java {
 
 application {
     // Define the main class for the application.
-    mainClass = "org.example.AppKt"
+    mainClass = "org.app.AppKt"
+}
+
+// Build a runnable "fat jar" so `java -jar app/build/libs/app.jar` works:
+// it sets the Main-Class in the manifest and bundles the runtime dependencies.
+tasks.jar {
+    manifest {
+        attributes["Main-Class"] = application.mainClass
+    }
+    from({
+        configurations.runtimeClasspath.get()
+            .filter { it.name.endsWith("jar") }
+            .map { zipTree(it) }
+    })
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
