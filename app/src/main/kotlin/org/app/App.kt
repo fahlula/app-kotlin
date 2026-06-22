@@ -4,100 +4,158 @@
 package org.app
 
 class App {
-
-}
-
-// Sistema de oferta de serviços 
-fun main() {
     val idadeMinima = 18
-    var respostaUsuario = "Não houve resposta"
-    var situacaoFinal = "Oferta não processada"
 
-    // Lista mutável que vai guardar as ofertas escolhidas pelo usuário
-    val ofertasEscolhidas = mutableListOf<String>()
+    val ofertas = mutableListOf<Oferta>()
 
-    // Mapa com ofertas organizadas por gênero (1=Feminino, 2=Masculino, 3=Outro)
-    val ofertas = mapOf(
-        1 to listOf("Filmes Romance", "Séries Drama", "Documentários"),
-        2 to listOf("Esportes", "Futebol", "MMA"),
-        3 to listOf("Jogos", "Filmes", "Documentários")
-    )
+    val pessoas = mutableListOf<Pessoa>()
 
-    println("Digite seu nome:")
-    val nome = readln()
-
-    println("Digite sua idade:")
-    val idade = readln().toInt()
-
-    println("Digite o número correspondente ao seu gênero:")
-    println("1 - Feminino")
-    println("2 - Masculino")
-    println("3 - Outro")
-    val opcaoGenero = readln().toInt()
-
-    val genero = when (opcaoGenero) {
-        1 -> "Feminino"
-        2 -> "Masculino"
-        3 -> "Outro"
-        else -> "Não informado"
+    init {
+        ofertas.add(Oferta(1, "Filmes"))
+        ofertas.add(Oferta(2, "Séries"))
+        ofertas.add(Oferta(3, "Documentários"))
+        ofertas.add(Oferta(4, "Esportes"))
+        ofertas.add(Oferta(5, "Futebol"))
+        ofertas.add(Oferta(6, "MMA"))
+        ofertas.add(Oferta(7, "Jogos"))
+        ofertas.add(Oferta(8, "Música"))
+        ofertas.add(Oferta(9, "Notícias"))
+        ofertas.add(Oferta(10, "Cursos"))
     }
 
-    val maiorDeIdade = idade >= idadeMinima
+    fun iniciar() {
+        var continuar = true
 
-    if (maiorDeIdade) {
-        // Obtém as ofertas do gênero escolhido. Se gênero inválido, oferece a geral (Elvis Operator ?:)
-        val minhasOfertas = ofertas[opcaoGenero] ?: listOf("Oferta geral de entretenimento")
+        while (continuar) {
+            cadastrarPessoa()
 
-        println()
-        println("Olá, $nome!")
-        println("Temos ${minhasOfertas.size} oferta(s) disponíveis para você.")
+            var opcao: Int
 
-        // Percorre CADA oferta disponível para esse gênero
-        for (oferta in minhasOfertas) {
-            println()
-            println("Oferta disponível: $oferta")
-            println("Você aceita esta oferta? Digite true ou false:")
+            do {
+                println("")
+                println("Gostaria de contratar outra assinatura para outra pessoa?")
+                println("1 - Sim")
+                println("2 - Não")
+                print("Opção: ")
 
-            val aceitaOferta = readln().toBoolean()
+                opcao = readln().toInt()
 
-            if (aceitaOferta) {
-                ofertasEscolhidas.add(oferta)
-                println("Oferta adicionada com sucesso!")
-            } else {
-                println("Oferta recusada.")
+                if (opcao != 1 && opcao != 2) {
+                    mostrarOpcaoInvalida()
+                }
+
+            } while (opcao != 1 && opcao != 2)
+
+            if (opcao == 2) {
+                continuar = false
             }
         }
 
-        // Valida se o usuário aceitou PELO MENOS 1 oferta
-        if (ofertasEscolhidas.size > 0) {
-            respostaUsuario = "Aceitou ${ofertasEscolhidas.size} oferta(s)"
-            situacaoFinal = "Serviço contratado com sucesso"
+        mostrarRelatorioGeral()
+    }
+
+    fun cadastrarPessoa() {
+        println("=== CADASTRO ===")
+        print("Digite seu nome: ")
+        val nome = readln()
+        print("Digite sua idade: ")
+        val idade = readln().toInt()
+
+        val respostas = mutableListOf<RespostaOferta>()
+
+        if (idade >= idadeMinima) {
+            mostrarOfertas()
+            println("")
+            println("Digite os números das ofertas que deseja contratar separados por vírgula:")
+            println("Exemplo: 1,5,6 (Digite sem dar espaços entre as vÍrgulas)")
+            print("Escolhas: ")
+            val escolhasDigitadas = readln()
+
+            val partes = escolhasDigitadas.split(",")
+            val numerosEscolhidos = mutableListOf<Int>()
+
+            for (parte in partes) {
+                val numero = parte.toInt()
+
+                if (numero !in numerosEscolhidos) {
+                    numerosEscolhidos.add(numero)
+                }
+            }
+
+            for (oferta in ofertas) {
+                val aceitou = oferta.numero in numerosEscolhidos
+                val resposta = RespostaOferta(oferta, aceitou)
+                respostas.add(resposta)
+
+            }
         } else {
-            respostaUsuario = "Recusou todas as ofertas"
-            situacaoFinal = "Nenhuma oferta aceita"
+            println("Menor de idade, nenhuma oferta disponível")
         }
-    } else {
-        situacaoFinal = "Oferta não permitida para menores de idade"
+
+        val pessoa = Pessoa(nome, idade, respostas)
+        pessoas.add(pessoa)
     }
 
-    // Exibe o relatório final com todas as informações do usuário
-    println()
-    println("=== RELATÓRIO ===")
-    println("Nome: $nome")
-    println("Idade: $idade")
-    println("Sexo/gênero: $genero")
-    println("Maior de idade? $maiorDeIdade")
+    fun mostrarOfertas() {
+        println()
+        println("Ofertas disponíveis para você: ")
 
-    // Mostra todas as ofertas escolhidas pelo usuário
-    if (ofertasEscolhidas.size > 0) {
-        println("Ofertas selecionadas:")
-        for (oferta in ofertasEscolhidas) {
-            println("- $oferta")
+        for (oferta in ofertas) {
+            println("${oferta.numero} - ${oferta.nome}")
         }
-    } else {
-        println("Nenhuma oferta selecionada")
     }
 
-    println("Resposta do usuário: $respostaUsuario")
-    println("Situação final: $situacaoFinal")
+
+    fun mostrarRelatorioGeral() {
+        println("")
+        println("=== RELATÓRIO GERAL ===")
+
+        for (pessoa in pessoas) {
+            println("")
+            println("Nome: ${pessoa.nome}")
+            println("Idade: ${pessoa.idade}")
+
+            if (pessoa.idade < idadeMinima) {
+                println("Menor de idade: nenhuma oferta disponível")
+            } else {
+                println("Ofertas: ")
+            }
+
+            for (resposta in pessoa.respostas) {
+                if (resposta.aceitou) {
+                    println("${resposta.oferta.numero} - ${resposta.oferta.nome} - ACEITA")
+                } else {
+                    println("${resposta.oferta.numero} - ${resposta.oferta.nome} - RECUSADA")
+                }
+            }
+        }
+    }
+
+    fun mostrarOpcaoInvalida() {
+        println()
+        println("Opção inválida, tente novamente!")
+    }
+
+}
+
+
+class Pessoa(
+    val nome: String,
+    val idade: Int,
+    val respostas: MutableList<RespostaOferta>
+)
+
+class Oferta(
+    val numero: Int,
+    val nome: String
+)
+
+class RespostaOferta(
+    val oferta: Oferta,
+    val aceitou: Boolean
+)
+
+fun main() {
+    val app = App()
+    app.iniciar()
 }
