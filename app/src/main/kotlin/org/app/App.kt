@@ -23,7 +23,7 @@ class App {
         ofertas.add(Oferta(10, "Cursos"))
     }
 
-    fun iniciar() {
+    fun rodar() {
         var continuar = true
 
         while (continuar) {
@@ -157,5 +157,5 @@ class RespostaOferta(
 
 fun main() {
     val app = App()
-    app.iniciar()
+    app.rodar()
 }
