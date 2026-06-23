@@ -7,8 +7,8 @@ class App {
     val idadeMinima = 18
 
     val ofertas = mutableListOf<Oferta>()
-
     val pessoas = mutableListOf<Pessoa>()
+    val telas = Telas()
 
     init {
         ofertas.add(Oferta(1, "Filmes"))
@@ -27,48 +27,33 @@ class App {
         var continuar = true
 
         while (continuar) {
-            cadastrarPessoa()
+            val maiorDeIdade = cadastrarPessoa()
 
-            var opcao: Int
-
-            do {
-                println("")
-                println("Gostaria de contratar outra assinatura para outra pessoa?")
-                println("1 - Sim")
-                println("2 - Não")
-                print("Opção: ")
-
-                opcao = readln().toInt()
-
-                if (opcao != 1 && opcao != 2) {
-                    mostrarOpcaoInvalida()
-                }
-
-            } while (opcao != 1 && opcao != 2)
-
-            if (opcao == 2) {
-                continuar = false
+            if (maiorDeIdade) {
+                continuar = perguntarSeDesejaContratarOutraPessoa()
             }
         }
 
-        mostrarRelatorioGeral()
+        telas.mostrarRelatorioGeral(pessoas, idadeMinima)
     }
 
-    fun cadastrarPessoa() {
-        println("=== CADASTRO ===")
-        print("Digite seu nome: ")
+    fun cadastrarPessoa(): Boolean {
+        telas.mostrarTituloCadastro()
+
+        telas.pedirNome()
         val nome = readln()
-        print("Digite sua idade: ")
+
+        telas.pedirIdade()
         val idade = readln().toInt()
 
         val respostas = mutableListOf<RespostaOferta>()
 
-        if (idade >= idadeMinima) {
-            mostrarOfertas()
-            println("")
-            println("Digite os números das ofertas que deseja contratar separados por vírgula:")
-            println("Exemplo: 1,5,6 (Digite sem dar espaços entre as vÍrgulas)")
-            print("Escolhas: ")
+        val pessoa = Pessoa(nome, idade, respostas)
+
+        if (pessoa.ehMaiorDeIdade(idadeMinima)) {
+            telas.mostrarOfertas(ofertas)
+
+            telas.pedirEscolhasOfertas()
             val escolhasDigitadas = readln()
 
             val partes = escolhasDigitadas.split(",")
@@ -86,64 +71,44 @@ class App {
                 val aceitou = oferta.numero in numerosEscolhidos
                 val resposta = RespostaOferta(oferta, aceitou)
                 respostas.add(resposta)
-
             }
+
         } else {
-            println("Menor de idade, nenhuma oferta disponível")
+            telas.mostrarMensagemMenorDeIdade()
         }
 
-        val pessoa = Pessoa(nome, idade, respostas)
         pessoas.add(pessoa)
+
+        return pessoa.ehMaiorDeIdade(idadeMinima)
     }
 
-    fun mostrarOfertas() {
-        println()
-        println("Ofertas disponíveis para você: ")
+    fun perguntarSeDesejaContratarOutraPessoa(): Boolean {
+        var opcao: Int
 
-        for (oferta in ofertas) {
-            println("${oferta.numero} - ${oferta.nome}")
-        }
-    }
+        do {
+            telas.mostrarPerguntaContratarOutraPessoa()
 
+            opcao = readln().toInt()
 
-    fun mostrarRelatorioGeral() {
-        println("")
-        println("=== RELATÓRIO GERAL ===")
-
-        for (pessoa in pessoas) {
-            println("")
-            println("Nome: ${pessoa.nome}")
-            println("Idade: ${pessoa.idade}")
-
-            if (pessoa.idade < idadeMinima) {
-                println("Menor de idade: nenhuma oferta disponível")
-            } else {
-                println("Ofertas: ")
+            if (opcao != 1 && opcao != 2) {
+                telas.mostrarOpcaoInvalida()
             }
 
-            for (resposta in pessoa.respostas) {
-                if (resposta.aceitou) {
-                    println("${resposta.oferta.numero} - ${resposta.oferta.nome} - ACEITA")
-                } else {
-                    println("${resposta.oferta.numero} - ${resposta.oferta.nome} - RECUSADA")
-                }
-            }
-        }
-    }
+        } while (opcao != 1 && opcao != 2)
 
-    fun mostrarOpcaoInvalida() {
-        println()
-        println("Opção inválida, tente novamente!")
+        return opcao == 1
     }
-
 }
-
 
 class Pessoa(
     val nome: String,
     val idade: Int,
     val respostas: MutableList<RespostaOferta>
-)
+) {
+    fun ehMaiorDeIdade(idadeMinima: Int): Boolean {
+        return idade >= idadeMinima
+    }
+}
 
 class Oferta(
     val numero: Int,
@@ -154,6 +119,79 @@ class RespostaOferta(
     val oferta: Oferta,
     val aceitou: Boolean
 )
+
+class Telas {
+    fun mostrarTituloCadastro() {
+        println()
+        println("=== CADASTRO ===")
+    }
+
+    fun pedirNome() {
+        print("Digite seu nome: ")
+    }
+
+    fun pedirIdade() {
+        print("Digite sua idade: ")
+    }
+
+    fun mostrarMensagemMenorDeIdade() {
+        println("Menor de idade, nenhuma oferta disponível")
+    }
+
+    fun mostrarOfertas(ofertas: MutableList<Oferta>) {
+        println()
+        println("Ofertas disponíveis para você:")
+
+        for (oferta in ofertas) {
+            println("${oferta.numero} - ${oferta.nome}")
+        }
+    }
+
+    fun pedirEscolhasOfertas() {
+        println()
+        println("Digite os números das ofertas que deseja contratar separados por vírgula:")
+        println("Exemplo: 1,5,6 (Digite sem dar espaços entre as vírgulas)")
+        print("Escolhas: ")
+    }
+
+    fun mostrarPerguntaContratarOutraPessoa() {
+        println()
+        println("Gostaria de contratar outra assinatura para outra pessoa?")
+        println("1 - Sim")
+        println("2 - Não")
+        print("Opção: ")
+    }
+
+    fun mostrarRelatorioGeral(pessoas: MutableList<Pessoa>, idadeMinima: Int) {
+        println()
+        println("=== RELATÓRIO GERAL ===")
+
+        for (pessoa in pessoas) {
+            println()
+            println("Nome: ${pessoa.nome}")
+            println("Idade: ${pessoa.idade}")
+
+            if (pessoa.idade < idadeMinima) {
+                println("Menor de idade: nenhuma oferta disponível")
+            } else {
+                println("Ofertas:")
+
+                for (resposta in pessoa.respostas) {
+                    if (resposta.aceitou) {
+                        println("${resposta.oferta.numero} - ${resposta.oferta.nome} - ACEITA")
+                    } else {
+                        println("${resposta.oferta.numero} - ${resposta.oferta.nome} - RECUSADA")
+                    }
+                }
+            }
+        }
+    }
+
+    fun mostrarOpcaoInvalida() {
+        println()
+        println("Opção inválida, tente novamente!")
+    }
+}
 
 fun main() {
     val app = App()
