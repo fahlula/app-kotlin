@@ -44,7 +44,7 @@ class App {
         telas.pedirIdade()
         val idade = readln().toInt()
 
-        val contratante = Pessoa(nome, idade, mutableListOf())
+        val contratante = Pessoa(nome, idade)
 
         if (!contratante.ehMaiorDeIdade(idadeMinima)) {
             pessoas.add(contratante)
@@ -71,7 +71,7 @@ class App {
                 telas.pedirIdadeDependente()
                 val idadeDependente = readln().toInt()
 
-                usuario = Pessoa(nomeDependente, idadeDependente, respostas)
+                usuario = Pessoa(nomeDependente, idadeDependente)
             }
 
             val ofertasPermitidas = mutableListOf<Oferta>()
@@ -94,7 +94,9 @@ class App {
             for (parte in partes) {
                 val numero = parte.trim().toInt()
 
-                if (numero !in numerosEscolhidos) {
+                if (numero !in numerosEscolhidos && ofertasPermitidas.any {
+                        it.numero == numero
+                    }) {
                     numerosEscolhidos.add(numero)
                 }
             }
@@ -152,8 +154,7 @@ class App {
 
 class Pessoa(
     val nome: String,
-    val idade: Int,
-    val respostas: MutableList<RespostaOferta>
+    val idade: Int
 ) {
     fun ehMaiorDeIdade(idadeMinima: Int): Boolean {
         return idade >= idadeMinima
