@@ -8,6 +8,7 @@ class App {
     val contratacoes = mutableListOf<Contratacao>()
     val contratacoesFamilia = mutableListOf<ContratacaoFamilia>()
     val telas = Telas()
+    var proximoIdPessoa = 1
 
     init {
         ofertas.add(Oferta(1, "Filmes", 14)) // 14
@@ -35,16 +36,34 @@ class App {
         telas.mostrarRelatorioGeral(pessoas, contratacoes, contratacoesFamilia)
     }
 
+    fun criarPessoa(nome: String, idade: Int): Pessoa {
+        val pessoa = Pessoa(proximoIdPessoa, nome, idade)
+        proximoIdPessoa = proximoIdPessoa + 1
+        return pessoa
+    }
+
+    fun herdarOfertas(dependente: Pessoa, respostasContratante: List<RespostaOferta>): MutableList<RespostaOferta> {
+        val respostas = mutableListOf<RespostaOferta>()
+
+        for (resposta in respostasContratante) {
+            val oferta = resposta.oferta
+            if (resposta.aceitou && dependente.idade >= oferta.idadeMinima) {
+                respostas.add(RespostaOferta(oferta, true))
+            }
+        }
+        return respostas
+    }
+
     fun cadastrarContratacao(): Boolean {
         telas.mostrarTituloCadastro()
 
         telas.pedirNome()
-        val nome = readln()
+        val nome = lerNome()
 
         telas.pedirIdade()
-        val idade = lerInteiro()
+        val idade = lerIdade()
 
-        val contratante = Pessoa(nome, idade)
+        val contratante = criarPessoa(nome, idade)
 
         if (!contratante.ehMaiorDeIdade(idadeMinima)) {
             pessoas.add(contratante)
@@ -66,7 +85,7 @@ class App {
     fun contratarIndividual(contratante: Pessoa) {
         val respostas = escolherOfertas(contratante)
 
-        val contratacao = Contratacao(contratante, contratante, respostas)
+        val contratacao = Contratacao(contratante, respostas)
         contratacoes.add(contratacao)
     }
 
@@ -83,7 +102,15 @@ class App {
         while (continuarAdicionando) {
             val dependente = cadastrarDependente()
 
-            val respostas = escolherOfertas(dependente)
+            val respostas = herdarOfertas(dependente, respostasContratante)
+
+            if (respostas.isEmpty()) {
+                telas.mostrarDependenteSemOfertas()
+                continuarAdicionando = perguntarSeDesejaAdicionarDependente()
+                continue
+            }
+
+            telas.mostrarOfertasHerdadas(dependente, respostas)
             membros.add(MembroFamilia(dependente, respostas))
 
             continuarAdicionando = perguntarSeDesejaAdicionarDependente()
@@ -97,12 +124,12 @@ class App {
         telas.mostrarTituloCadastroDependente()
 
         telas.pedirNomeDependente()
-        val nomeDependente = readln()
+        val nomeDependente = lerNome()
 
         telas.pedirIdadeDependente()
-        val idadeDependente = lerInteiro()
+        val idadeDependente = lerIdade()
 
-        return Pessoa(nomeDependente, idadeDependente)
+        return criarPessoa(nomeDependente, idadeDependente)
     }
 
     fun escolherOfertas(usuario: Pessoa): MutableList<RespostaOferta> {
@@ -123,19 +150,24 @@ class App {
         val numerosEscolhidos = mutableListOf<Int>()
 
         while (!escolhasValidas) {
-            val escolhasDigitadas = readln()
+            val escolhasDigitadas = readln().trim()
+            numerosEscolhidos.clear()
+
+            if (escolhasDigitadas.isEmpty()) {
+                escolhasValidas = true
+                continue
+            }
 
             val partes = escolhasDigitadas.split(",")
-            numerosEscolhidos.clear()
             var temInvalido = false
 
             for (parte in partes) {
                 val numero = parte.trim().toIntOrNull()
 
-                if (numero != null && numero !in numerosEscolhidos && ofertasPermitidas.any { it.numero == numero }) {
-                    numerosEscolhidos.add(numero)
-                } else {
+                if (numero == null || ofertasPermitidas.none { it.numero == numero }) {
                     temInvalido = true
+                } else if (numero !in numerosEscolhidos) {
+                    numerosEscolhidos.add(numero)
                 }
             }
 
@@ -165,6 +197,28 @@ class App {
         }
 
         return valor
+    }
+
+    fun lerNome(): String {
+        var nome = readln().trim()
+
+        while (nome.isEmpty()) {
+            telas.mostrarNomeInvalido()
+            nome = readln().trim()
+        }
+
+        return nome
+    }
+
+    fun lerIdade(): Int {
+        var idade = lerInteiro()
+
+        while (idade !in 0..120) {
+            telas.mostrarIdadeInvalida()
+            idade = lerInteiro()
+        }
+
+        return idade
     }
 
     fun perguntarSeDesejaFazerOutraContratacao(): Boolean {
@@ -231,6 +285,7 @@ class ContratacaoFamilia(
 
 
 class Pessoa(
+    val id: Int,
     val nome: String,
     val idade: Int
 ) {
@@ -241,7 +296,6 @@ class Pessoa(
 
 class Contratacao(
     val contratante: Pessoa,
-    val usuario: Pessoa,
     val respostas: MutableList<RespostaOferta>
 )
 
@@ -284,10 +338,25 @@ class Telas {
         }
     }
 
+    fun mostrarDependenteSemOfertas() {
+        println()
+        println("Não há ofertas disponíveis para este dependente neste plano.")
+    }
+
+    fun mostrarOfertasHerdadas(dependente: Pessoa, respostas: MutableList<RespostaOferta>) {
+        println()
+        println("Ofertas herdadas por ${dependente.nome}:")
+
+        for (resposta in respostas) {
+            println("${resposta.oferta.numero} - ${resposta.oferta.nome}")
+        }
+    }
+
     fun pedirEscolhasOfertas() {
         println()
         println("Digite os números das ofertas que deseja contratar separados por vírgula:")
         println("Exemplo: 1,5,6 (Digite sem dar espaços entre as vírgulas)")
+        println("Ou apenas aperte Enter para não contratar nenhuma.")
         print("Escolhas: ")
     }
 
@@ -307,6 +376,18 @@ class Telas {
     fun mostrarEntradaInvalida() {
         println()
         println("Entrada inválida. Digite apenas números.")
+        print("Digite novamente: ")
+    }
+
+    fun mostrarNomeInvalido() {
+        println()
+        println("Nome inválido. Digite pelo menos um caractere.")
+        print("Digite novamente: ")
+    }
+
+    fun mostrarIdadeInvalida() {
+        println()
+        println("Idade inválida. Digite um valor entre 0 e 120.")
         print("Digite novamente: ")
     }
 
@@ -335,7 +416,7 @@ class Telas {
     fun mostrarTituloAssinaturaFamilia() {
         println()
         println("=== ASSINATURA FAMÍLIA ===")
-        println("Vamos montar a assinatura começando por você e depois adicionar os dependentes.")
+        println("Você escolhe as ofertas do plano e cada dependente herda o que for compatível com a idade dele.")
     }
 
     fun mostrarPerguntaAdicionarDependente() {
@@ -378,18 +459,7 @@ class Telas {
             for (contratacao in contratacoes) {
                 println()
                 println("Contratante: ${contratacao.contratante.nome}")
-
-                if (contratacao.usuario.nome == contratacao.contratante.nome &&
-                    contratacao.usuario.idade == contratacao.contratante.idade
-                ) {
-                    println("Assinatura para o próprio contratante")
-                    println("Idade do contratante: ${contratacao.contratante.idade}")
-                } else {
-                    println("Assinatura para dependente")
-                    println("Dependente: ${contratacao.usuario.nome}")
-                    println("Idade do dependente: ${contratacao.usuario.idade}")
-                }
-
+                println("Idade do contratante: ${contratacao.contratante.idade}")
                 println("Ofertas:")
 
                 for (resposta in contratacao.respostas) {
@@ -416,9 +486,9 @@ class Telas {
                 for (membro in familia.membros) {
                     println()
 
-                    if (membro.pessoa.nome == familia.contratante.nome &&
-                        membro.pessoa.idade == familia.contratante.idade
-                    ) {
+                    val ehContratante = membro.pessoa.id == familia.contratante.id
+
+                    if (ehContratante) {
                         println("Membro (contratante): ${membro.pessoa.nome}")
                     } else {
                         println("Membro (dependente): ${membro.pessoa.nome}")
@@ -428,10 +498,14 @@ class Telas {
                     println("Ofertas:")
 
                     for (resposta in membro.respostas) {
-                        if (resposta.aceitou) {
-                            println("${resposta.oferta.numero} - ${resposta.oferta.nome} - ACEITA")
+                        if (ehContratante) {
+                            if (resposta.aceitou) {
+                                println("${resposta.oferta.numero} - ${resposta.oferta.nome} - ACEITA")
+                            } else {
+                                println("${resposta.oferta.numero} - ${resposta.oferta.nome} - RECUSADA")
+                            }
                         } else {
-                            println("${resposta.oferta.numero} - ${resposta.oferta.nome} - RECUSADA")
+                            println("${resposta.oferta.numero} - ${resposta.oferta.nome}")
                         }
                     }
                 }
