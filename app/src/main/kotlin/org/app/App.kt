@@ -313,8 +313,7 @@ class RespostaOferta(
 
 class Telas {
     fun mostrarTituloCadastro() {
-        println()
-        println("=== CADASTRO ===")
+        println("\n=== CADASTRO ===")
     }
 
     fun pedirNome() {
@@ -330,8 +329,7 @@ class Telas {
     }
 
     fun mostrarOfertas(usuario: Pessoa, ofertas: MutableList<Oferta>) {
-        println()
-        println("Ofertas disponíveis para ${usuario.nome}:")
+        println("\nOfertas disponíveis para ${usuario.nome}:")
 
         for (oferta in ofertas) {
             println("${oferta.numero} - ${oferta.nome}")
@@ -339,13 +337,11 @@ class Telas {
     }
 
     fun mostrarDependenteSemOfertas() {
-        println()
-        println("Não há ofertas disponíveis para este dependente neste plano.")
+        println("\nNão há ofertas disponíveis para este dependente neste plano.")
     }
 
     fun mostrarOfertasHerdadas(dependente: Pessoa, respostas: MutableList<RespostaOferta>) {
-        println()
-        println("Ofertas herdadas por ${dependente.nome}:")
+        println("\nOfertas herdadas por ${dependente.nome}:")
 
         for (resposta in respostas) {
             println("${resposta.oferta.numero} - ${resposta.oferta.nome}")
@@ -353,47 +349,40 @@ class Telas {
     }
 
     fun pedirEscolhasOfertas() {
-        println()
-        println("Digite os números das ofertas que deseja contratar separados por vírgula:")
-        println("Exemplo: 1,5,6 (Digite sem dar espaços entre as vírgulas)")
-        println("Ou apenas aperte Enter para não contratar nenhuma.")
+        println("\nDigite os números das ofertas que deseja contratar separados por vírgula:\n" +
+                "Exemplo: 1,5,6 (Digite sem dar espaços entre as vírgulas)\n" +
+                "Ou apenas aperte Enter para não contratar nenhuma.")
         print("Escolhas: ")
     }
 
     fun mostrarPerguntaFazerOutraContratacao() {
-        println()
-        println("Outra pessoa deseja fazer uma contratação?")
-        println("1 - Sim, cadastrar outra pessoa")
-        println("2 - Não, encerrar")
+        println("\nOutra pessoa deseja fazer uma contratação?\n" +
+                "1 - Sim, cadastrar outra pessoa\n" +
+                "2 - Não, encerrar")
         print("Opção: ")
     }
 
     fun mostrarOpcaoInvalida() {
-        println()
-        println("Opção inválida, tente novamente!")
+        println("\nOpção inválida, tente novamente!")
     }
 
     fun mostrarEntradaInvalida() {
-        println()
-        println("Entrada inválida. Digite apenas números.")
+        println("\nEntrada inválida. Digite apenas números.")
         print("Digite novamente: ")
     }
 
     fun mostrarNomeInvalido() {
-        println()
-        println("Nome inválido. Digite pelo menos um caractere.")
+        println("\nNome inválido. Digite pelo menos um caractere.")
         print("Digite novamente: ")
     }
 
     fun mostrarIdadeInvalida() {
-        println()
-        println("Idade inválida. Digite um valor entre 0 e 120.")
+        println("\nIdade inválida. Digite um valor entre 0 e 120.")
         print("Digite novamente: ")
     }
 
     fun mostrarTituloCadastroDependente() {
-        println()
-        println("=== CADASTRO DO DEPENDENTE ===")
+        println("\n=== CADASTRO DO DEPENDENTE ===")
     }
 
     fun pedirNomeDependente() {
@@ -405,25 +394,21 @@ class Telas {
     }
 
     fun mostrarPerguntaTipoAssinatura() {
-        println()
-        println("A assinatura será qual tipo?")
-        println("1 - Individual")
-        println("2 - Familia")
+        println("\nA assinatura será qual tipo?\n" +
+                "1 - Individual\n" +
+                "2 - Familia")
         print("Opção: ")
-
     }
 
     fun mostrarTituloAssinaturaFamilia() {
-        println()
-        println("=== ASSINATURA FAMÍLIA ===")
-        println("Você escolhe as ofertas do plano e cada dependente herda o que for compatível com a idade dele.")
+        println("\n=== ASSINATURA FAMÍLIA ===\n" +
+                "Você escolhe as ofertas do plano e cada dependente herda o que for compatível com a idade dele.")
     }
 
     fun mostrarPerguntaAdicionarDependente() {
-        println()
-        println("Gostaria de adicionar outro dependente na assinatura família?")
-        println("1 - Sim")
-        println("2 - Não")
+        println("\nGostaria de adicionar outro dependente na assinatura família?\n" +
+                "1 - Sim\n" +
+                "2 - Não")
         print("Opção: ")
     }
 
@@ -432,35 +417,30 @@ class Telas {
         contratacoes: MutableList<Contratacao>,
         contratacoesFamilia: MutableList<ContratacaoFamilia>
     ) {
-        println()
-        println("=== RELATÓRIO GERAL ===")
+        println("\n=== RELATÓRIO GERAL ===")
 
-        println()
-        println("=== PESSOAS QUE NÃO CONSEGUIRAM CONTRATAR ===")
+        println("\n=== PESSOAS QUE NÃO CONSEGUIRAM CONTRATAR ===")
 
         if (pessoas.isEmpty()) {
             println("Lista vazia.")
         } else {
             for (pessoa in pessoas) {
-                println()
-                println("Nome: ${pessoa.nome}")
+                println("\nNome: ${pessoa.nome}")
                 println("Idade: ${pessoa.idade}")
                 println("Não realizou contratação.")
                 println("Motivo: menor de idade não pode contratar serviços.")
             }
         }
 
-        println()
-        println("=== ASSINATURAS INDIVIDUAIS ===")
+        println("\n=== ASSINATURAS INDIVIDUAIS ===")
 
         if (contratacoes.isEmpty()) {
             println("Lista vazia.")
         } else {
             for (contratacao in contratacoes) {
-                println()
-                println("Contratante: ${contratacao.contratante.nome}")
-                println("Idade do contratante: ${contratacao.contratante.idade}")
-                println("Ofertas:")
+                println("\nContratante: ${contratacao.contratante.nome}\n" +
+                        "Idade do contratante: ${contratacao.contratante.idade}\n" +
+                        "Ofertas:")
 
                 for (resposta in contratacao.respostas) {
                     if (resposta.aceitou) {
@@ -472,30 +452,26 @@ class Telas {
             }
         }
 
-        println()
-        println("=== ASSINATURAS FAMÍLIA ===")
+        println("\n=== ASSINATURAS FAMÍLIA ===")
 
         if (contratacoesFamilia.isEmpty()) {
             println("Lista vazia.")
         } else {
             for (familia in contratacoesFamilia) {
-                println()
-                println("Contratante: ${familia.contratante.nome}")
-                println("Membros da família: ${familia.membros.size}")
+                println("\nContratante: ${familia.contratante.nome}\n" +
+                        "Membros da família: ${familia.membros.size}")
 
                 for (membro in familia.membros) {
-                    println()
-
                     val ehContratante = membro.pessoa.id == familia.contratante.id
 
                     if (ehContratante) {
-                        println("Membro (contratante): ${membro.pessoa.nome}")
+                        println("\nMembro (contratante): ${membro.pessoa.nome}")
                     } else {
-                        println("Membro (dependente): ${membro.pessoa.nome}")
+                        println("\nMembro (dependente): ${membro.pessoa.nome}")
                     }
 
-                    println("Idade: ${membro.pessoa.idade}")
-                    println("Ofertas:")
+                    println("Idade: ${membro.pessoa.idade}\n" +
+                            "Ofertas:")
 
                     for (resposta in membro.respostas) {
                         if (ehContratante) {
