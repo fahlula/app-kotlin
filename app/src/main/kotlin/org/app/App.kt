@@ -80,11 +80,11 @@ class App {
     fun contratarFamilia(contratante: Pessoa) {
         telas.mostrarTituloAssinaturaFamilia()
 
-        val membros = mutableListOf<MembroFamilia>()
+        val contratacaoFamilia = ContratacaoFamilia(contratante)
 
         val respostasContratante = escolherOfertas(contratante)
         val membroContratante = MembroFamilia(contratante, respostasContratante)
-        membros.add(membroContratante)
+        contratacaoFamilia.adicionarMembro(membroContratante)
 
         var continuarAdicionando = true
 
@@ -100,12 +100,11 @@ class App {
             }
 
             telas.mostrarOfertasHerdadas(dependente, respostas)
-            membros.add(MembroFamilia(dependente, respostas))
+            contratacaoFamilia.adicionarMembro(MembroFamilia(dependente, respostas))
 
             continuarAdicionando = perguntarSeDesejaAdicionarDependente()
         }
 
-        val contratacaoFamilia = ContratacaoFamilia(contratante, membros)
         contratacoesFamilia.add(contratacaoFamilia)
     }
 
@@ -280,9 +279,16 @@ class MembroFamilia(
 }
 
 class ContratacaoFamilia(
-    val contratante: Pessoa,
-    val membros: MutableList<MembroFamilia>
-)
+    val contratante: Pessoa
+) {
+    private val _membros = mutableListOf<MembroFamilia>()
+    val membros: List<MembroFamilia>
+        get() = _membros
+
+    fun adicionarMembro(membro: MembroFamilia) {
+        _membros.add(membro)
+    }
+}
 
 
 class Pessoa(
