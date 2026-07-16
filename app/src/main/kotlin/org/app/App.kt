@@ -42,18 +42,6 @@ class App {
         return pessoa
     }
 
-    fun herdarOfertas(dependente: Pessoa, respostasContratante: List<RespostaOferta>): MutableList<RespostaOferta> {
-        val respostas = mutableListOf<RespostaOferta>()
-
-        for (resposta in respostasContratante) {
-            val oferta = resposta.oferta
-            if (resposta.aceitou && dependente.idade >= oferta.idadeMinima) {
-                respostas.add(RespostaOferta(oferta, true))
-            }
-        }
-        return respostas
-    }
-
     fun cadastrarContratacao(): Boolean {
         telas.mostrarTituloCadastro()
 
@@ -95,14 +83,15 @@ class App {
         val membros = mutableListOf<MembroFamilia>()
 
         val respostasContratante = escolherOfertas(contratante)
-        membros.add(MembroFamilia(contratante, respostasContratante))
+        val membroContratante = MembroFamilia(contratante, respostasContratante)
+        membros.add(membroContratante)
 
         var continuarAdicionando = true
 
         while (continuarAdicionando) {
             val dependente = cadastrarDependente()
 
-            val respostas = herdarOfertas(dependente, respostasContratante)
+            val respostas = membroContratante.ofertasHerdadasPara(dependente)
 
             if (respostas.isEmpty()) {
                 telas.mostrarDependenteSemOfertas()
@@ -138,7 +127,7 @@ class App {
         val ofertasPermitidas = mutableListOf<Oferta>()
 
         for (oferta in ofertas) {
-            if (usuario.idade >= oferta.idadeMinima) {
+            if (oferta.permitidaPara(usuario)) {
                 ofertasPermitidas.add(oferta)
             }
         }
@@ -276,7 +265,19 @@ class App {
 class MembroFamilia(
     val pessoa: Pessoa,
     val respostas: MutableList<RespostaOferta>
-)
+) {
+    fun ofertasHerdadasPara(dependente: Pessoa): MutableList<RespostaOferta> {
+        val herdadas = mutableListOf<RespostaOferta>()
+
+        for (resposta in respostas) {
+            if (resposta.aceitou && resposta.oferta.permitidaPara(dependente)) {
+                herdadas.add(RespostaOferta(resposta.oferta, true))
+            }
+        }
+
+        return herdadas
+    }
+}
 
 class ContratacaoFamilia(
     val contratante: Pessoa,
@@ -303,8 +304,11 @@ class Oferta(
     val numero: Int,
     val nome: String,
     val idadeMinima: Int
-
-)
+) {
+    fun permitidaPara(pessoa: Pessoa): Boolean {
+        return pessoa.idade >= idadeMinima
+    }
+}
 
 class RespostaOferta(
     val oferta: Oferta,
