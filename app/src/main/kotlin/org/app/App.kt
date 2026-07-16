@@ -308,12 +308,21 @@ class Oferta(
     fun permitidaPara(pessoa: Pessoa): Boolean {
         return pessoa.idade >= idadeMinima
     }
+
+    fun descricao(): String {
+        return "$numero - $nome"
+    }
 }
 
 class RespostaOferta(
     val oferta: Oferta,
     val aceitou: Boolean
-)
+) {
+    fun descricao(): String {
+        val status = if (aceitou) "ACEITA" else "RECUSADA"
+        return "${oferta.descricao()} - $status"
+    }
+}
 
 class Telas {
     fun mostrarTituloCadastro() {
@@ -336,7 +345,7 @@ class Telas {
         println("\nOfertas disponíveis para ${usuario.nome}:")
 
         for (oferta in ofertas) {
-            println("${oferta.numero} - ${oferta.nome}")
+            println(oferta.descricao())
         }
     }
 
@@ -348,7 +357,7 @@ class Telas {
         println("\nOfertas herdadas por ${dependente.nome}:")
 
         for (resposta in respostas) {
-            println("${resposta.oferta.numero} - ${resposta.oferta.nome}")
+            println(resposta.oferta.descricao())
         }
     }
 
@@ -447,11 +456,7 @@ class Telas {
                         "Ofertas:")
 
                 for (resposta in contratacao.respostas) {
-                    if (resposta.aceitou) {
-                        println("${resposta.oferta.numero} - ${resposta.oferta.nome} - ACEITA")
-                    } else {
-                        println("${resposta.oferta.numero} - ${resposta.oferta.nome} - RECUSADA")
-                    }
+                    println(resposta.descricao())
                 }
             }
         }
@@ -479,13 +484,9 @@ class Telas {
 
                     for (resposta in membro.respostas) {
                         if (ehContratante) {
-                            if (resposta.aceitou) {
-                                println("${resposta.oferta.numero} - ${resposta.oferta.nome} - ACEITA")
-                            } else {
-                                println("${resposta.oferta.numero} - ${resposta.oferta.nome} - RECUSADA")
-                            }
+                            println(resposta.descricao())
                         } else {
-                            println("${resposta.oferta.numero} - ${resposta.oferta.nome}")
+                            println(resposta.oferta.descricao())
                         }
                     }
                 }
